@@ -1,0 +1,17 @@
+curl -H "X-Dune-API-Key:7Jdw9G9PuEbdSr4CTwJXY3cD8DP2X0NF" "https://api.dune.com/api/v1/query/4436493/results/csv?limit=1000"
+
+ether.Fi holder retention rates 
+ether.fi deposits retention rates
+either.fi LRT holders retention rates 
+ether.fi lrt Deposits retention rates 
+eithe.fi liquid valut deposits rentention rates 
+ether.fi liquid valut holders retention rates 
+eEth stacking metrics : eETH user staking APR(day,block_day,daily_apr,apr_padding_high,avg_7day_apr,avg_30day_apr,apr_padding_low,all_time_apr,oracle_rate,dex_rate,pad_high,nav_ratio,constant_one,pad_low,premium_or_discount,premium_or_discount_perc,premium_or_discount_bips,avg_7day_apr_cnt,avg_30day_apr_cnt,premium_or_discount_perc_cnt,buffer_eth,pending_withdrawals,cum_withdraw,cum_deposit,cum_netflow,withdraw,deposit,daily_netflow,withdrawers,depositors,first_time_deposits,repeat_deposits,first_time_depositors,repeat_depositors)
+eEth stacking metrics : active_holder_change(granularity_day,holder_class,addresses,token_balance_usd,active_address,balance_tracked,num_month,month_change,total_unique_holders)
+
+curl -H "X-Dune-API-Key:7Jdw9G9PuEbdSr4CTwJXY3cD8DP2X0NF" "https://api.dune.com/api/v1/query/3961686/results/csv?limit=1000"
+curl -H "X-Dune-API-Key:7Jdw9G9PuEbdSr4CTwJXY3cD8DP2X0NF" "https://api.dune.com/api/v1/query/5153772/results/csv?limit=1000"
+
+curl -H "X-Dune-API-Key:7Jdw9G9PuEbdSr4CTwJXY3cD8DP2X0NF" "https://api.dune.com/api/v1/query/4834568/results/csv?limit=1000"
+curl -H "X-Dune-API-Key:7Jdw9G9PuEbdSr4CTwJXY3cD8DP2X0NF" "https://api.dune.com/api/v1/query/4834578/results/csv?limit=1000"
+curl -H "X-Dune-API-Key:7Jdw9G9PuEbdSr4CTwJXY3cD8DP2X0NF" "https://api.dune.com/api/v1/query/4436493/results/csv?limit=1000"

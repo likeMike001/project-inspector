@@ -2,6 +2,14 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Trust API configuration
+
+Set the verification service URL (FastAPI from `trust_layer`) before running the dev server:
+
+```bash
+export NEXT_PUBLIC_TRUST_API_URL="http://localhost:8000"
+```
+
 First, run the development server:
 
 ```bash

@@ -16,6 +16,26 @@ import {
 
 type FocusMode = "price" | "sentiment";
 
+type TrustDataset = {
+  id: string;
+  label: string;
+  status: string;
+  sha256: string | null;
+  last_verified_at: string | null;
+  eigenlayer_attestation?: {
+    simulated?: boolean;
+    proof_id?: string;
+    confidence?: number;
+  };
+  zkp_simulation?: {
+    status?: string;
+    scheme?: string;
+  };
+};
+
+const TRUST_API_URL =
+  process.env.NEXT_PUBLIC_TRUST_API_URL ?? "http://localhost:8000";
+
 const mockPriceSeries = [
   { label: "Now", spot: 3540, projection: 3540 },
   { label: "+4h", spot: 3562, projection: 3590 },
@@ -42,6 +62,9 @@ export default function Home() {
   const [weight, setWeight] = useState(65); // 0 sentiment bias — 100 price bias
   const [wallet, setWallet] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [trustDatasets, setTrustDatasets] = useState<TrustDataset[]>([]);
+  const [trustStatus, setTrustStatus] =
+    useState<"idle" | "loading" | "error">("idle");
 
   const heroRef = useRef<HTMLDivElement | null>(null);
   const highlightRef = useRef<HTMLSpanElement | null>(null);
@@ -51,6 +74,35 @@ export default function Home() {
   useEffect(() => {
     const id = requestAnimationFrame(() => setHydrated(true));
     return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchTrust() {
+      try {
+        setTrustStatus("loading");
+        const response = await fetch(`${TRUST_API_URL}/trust/datasets`, {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error(`Trust API error: ${response.status}`);
+        }
+        const payload = await response.json();
+        if (!cancelled) {
+          setTrustDatasets(payload.datasets ?? []);
+          setTrustStatus("idle");
+        }
+      } catch (error) {
+        console.error("Failed to load trust datasets", error);
+        if (!cancelled) {
+          setTrustStatus("error");
+        }
+      }
+    }
+    fetchTrust();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -431,6 +483,87 @@ export default function Home() {
             <button className="rounded-2xl border border-emerald-400/50 px-6 py-3 text-sm font-semibold text-emerald-300 transition hover:border-emerald-300 hover:text-white">
               View integration checklist
             </button>
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-slate-400">
+                Trust verification
+              </p>
+              <h3 className="text-2xl font-semibold text-white">
+                EigenLayer-style proofs for static datasets
+              </h3>
+              <p className="mt-2 text-sm text-slate-300">
+                Hashes are recomputed on the trust service and exposed via the
+                `trust_layer` API. When models go live, their artifacts drop
+                into the same pipeline.
+              </p>
+            </div>
+            <span className="rounded-2xl border border-emerald-400/50 px-6 py-3 text-sm font-semibold text-emerald-300">
+              {trustStatus === "loading"
+                ? "Refreshing proofs…"
+                : trustStatus === "error"
+                ? "Verification unavailable"
+                : "Verified by EigenLayer"}
+            </span>
+          </div>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {trustStatus === "loading" && (
+              <div className="h-32 animate-pulse rounded-2xl border border-white/10 bg-slate-800/40" />
+            )}
+            {trustStatus === "error" && (
+              <div className="rounded-2xl border border-rose-400/30 bg-rose-950/40 p-4 text-sm text-rose-200">
+                Unable to reach the trust API. Is the FastAPI service running on{" "}
+                <code>{TRUST_API_URL}</code>?
+              </div>
+            )}
+            {trustStatus !== "error" &&
+              trustDatasets.map((dataset) => {
+                const verified = dataset.status === "ok";
+                return (
+                  <div
+                    key={dataset.id}
+                    className="rounded-2xl border border-white/10 bg-black/40 p-4 text-sm text-slate-200"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                          {dataset.id}
+                        </p>
+                        <p className="text-base font-semibold text-white">
+                          {dataset.label}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs ${
+                          verified
+                            ? "border border-emerald-400/50 text-emerald-200"
+                            : "border border-rose-400/50 text-rose-200"
+                        }`}
+                      >
+                        {verified ? "Verified" : "Missing"}
+                      </span>
+                    </div>
+                    <p className="mt-3 truncate text-xs font-mono text-slate-400">
+                      {dataset.sha256 ?? "—"}
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                      <span>
+                        {dataset.last_verified_at
+                          ? new Date(dataset.last_verified_at).toLocaleString()
+                          : "n/a"}
+                      </span>
+                      {dataset.zkp_simulation?.status && (
+                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-emerald-200">
+                          ZKP: {dataset.zkp_simulation.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </section>
       </main>
