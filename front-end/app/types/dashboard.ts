@@ -28,5 +28,9 @@ export type TrustDataset = {
   zkp_simulation?: {
     status?: string;
     scheme?: string;
+    public_key?: string | null;
+    commitment?: string | null;
+    challenge?: string | null;
+    response?: string | null;
   };
 };

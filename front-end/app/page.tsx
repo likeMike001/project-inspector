@@ -93,6 +93,8 @@ const DEFAULT_NARRATIVE =
   "Models are syncing signals -- adjust the slider to see how focus shifts recommendations.";
 const DEMO_NARRATIVE =
   "Claude notes a restake tilt with liquidity hedges kept light; watch deposits outpacing withdrawals.";
+const DEMO_WALLET_SUMMARY =
+  "Demo wallet mirrors EtherFi eETH + Pendle LP flow (refs: https://etherscan.io/token/0x35fa164735182de50811e8e2e824cfb9b6118ac2, https://etherscan.io/token/0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee, https://etherscan.io/token/0xa89a7420b19679b5a124cd1499787a6122e800d7).";
 
 export default function Home() {
   const [focus, setFocus] = useState<FocusMode>("price");
@@ -112,6 +114,30 @@ export default function Home() {
   const [modelMessage, setModelMessage] = useState<string | null>(null);
   const [lastRunAt, setLastRunAt] = useState<string | null>(null);
   const [narrativeCopy, setNarrativeCopy] = useState<string>(DEFAULT_NARRATIVE);
+  const [walletSummaryCopy, setWalletSummaryCopy] = useState<string | null>(
+    null,
+  );
+  const [walletSummaryError, setWalletSummaryError] = useState<string | null>(
+    null,
+  );
+
+  const fetchTrust = useCallback(async () => {
+    try {
+      setTrustStatus("loading");
+      const response = await fetch(`${TRUST_API_URL}/trust/datasets`, {
+        cache: "no-store",
+      });
+      if (!response.ok) {
+        throw new Error(`Trust API error: ${response.status}`);
+      }
+      const payload = await response.json();
+      setTrustDatasets(payload.datasets ?? []);
+      setTrustStatus("idle");
+    } catch (error) {
+      console.error("Failed to load trust datasets", error);
+      setTrustStatus("error");
+    }
+  }, [TRUST_API_URL]);
 
   const heroRef = useRef<HTMLDivElement | null>(null);
   const highlightRef = useRef<HTMLSpanElement | null>(null);
@@ -141,33 +167,8 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    async function fetchTrust() {
-      try {
-        setTrustStatus("loading");
-        const response = await fetch(`${TRUST_API_URL}/trust/datasets`, {
-          cache: "no-store",
-        });
-        if (!response.ok) {
-          throw new Error(`Trust API error: ${response.status}`);
-        }
-        const payload = await response.json();
-        if (!cancelled) {
-          setTrustDatasets(payload.datasets ?? []);
-          setTrustStatus("idle");
-        }
-      } catch (error) {
-        console.error("Failed to load trust datasets", error);
-        if (!cancelled) {
-          setTrustStatus("error");
-        }
-      }
-    }
     fetchTrust();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  }, [fetchTrust]);
 
   useEffect(() => {
     if (!heroRef.current) return;
@@ -250,13 +251,12 @@ export default function Home() {
         typeof bias === "number" ? bias : weightRef.current ?? weight;
       const priceWeight = Math.min(Math.max(effectiveBias / 100, 0), 1);
       const sentimentWeight = 1 - priceWeight;
+      const includeWalletSignal =
+        includeWallet && walletRef.current.trim().length > 0;
       const payload = {
         price_weight: priceWeight,
         sentiment_weight: sentimentWeight,
-        wallet:
-          includeWallet && walletRef.current.trim().length > 0
-            ? walletRef.current.trim()
-            : null,
+        wallet: includeWalletSignal ? walletRef.current.trim() : null,
       };
 
       if (USE_DEMO_SIGNALS) {
@@ -266,6 +266,10 @@ export default function Home() {
         setLastRunAt(new Date().toISOString());
         setNarrativeCopy(DEMO_NARRATIVE);
         setRecStatus("idle");
+        if (includeWalletSignal) {
+          setWalletSummaryCopy(DEMO_WALLET_SUMMARY);
+          setWalletSummaryError(null);
+        }
         return;
       }
 
@@ -296,6 +300,18 @@ export default function Home() {
         setModelMessage(body.message ?? null);
         setLastRunAt(body.generated_at ?? new Date().toISOString());
         setNarrativeCopy(body.narrative ?? DEFAULT_NARRATIVE);
+        if (includeWalletSignal) {
+          if (body.wallet_summary) {
+            setWalletSummaryCopy(
+              `${body.wallet_summary.holdings_text ?? ""} ${
+                body.wallet_summary.recent_activity_text ?? ""
+              }`.trim(),
+            );
+          } else {
+            setWalletSummaryCopy(null);
+          }
+          setWalletSummaryError(body.wallet_summary_error ?? null);
+        }
         setRecStatus("idle");
       } catch (error) {
         if (controller.signal.aborted) return;
@@ -308,6 +324,12 @@ export default function Home() {
         );
         setLastRunAt(new Date().toISOString());
         setNarrativeCopy(DEFAULT_NARRATIVE);
+        if (includeWalletSignal) {
+          setWalletSummaryCopy(null);
+          setWalletSummaryError(
+            "Wallet inspector unavailable; showing cached model copy.",
+          );
+        }
       }
     },
     [weight],
@@ -389,7 +411,7 @@ export default function Home() {
         />
 
         <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
+          <div className="panel-animate glow-border rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur">
             <FocusControls
               focus={focus}
               weight={weight}
@@ -405,6 +427,8 @@ export default function Home() {
               recStatus={recStatus}
               disabled={USE_DEMO_SIGNALS}
               modelMessage={modelMessage}
+              walletSummaryCopy={walletSummaryCopy}
+              walletSummaryError={walletSummaryError}
             />
             <div className="mt-6 grid gap-4 lg:grid-cols-2">
               <ActionStackCard
@@ -444,6 +468,7 @@ export default function Home() {
           status={trustStatus}
           datasets={trustDatasets}
           trustApiUrl={TRUST_API_URL}
+          onRefresh={fetchTrust}
         />
       </main>
     </div>

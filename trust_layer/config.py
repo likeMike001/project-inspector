@@ -31,8 +31,8 @@ DATASETS: List[DatasetEntry] = [
         "path": PROJECT_ROOT / "data" / "final_with_sentiment.csv",
     },
     {
-        "id": "synthetic_news",
-        "label": "Synthetic News Export",
+        "id": "news",
+        "label": "News Export",
         "path": PROJECT_ROOT / "data" / "synthetic_news_string_20251109_060057.csv",
     },
     {

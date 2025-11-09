@@ -1,0 +1,26 @@
+{
+  "wallet": "0xf0bb20865277aBd641a307eCe5Ee04E79073416C",
+  "rpc_url": "https://sepolia.infura.io/v3/b3f667d31a974284b3e91a55b6ba51b3",
+  "network": "sepolia",
+  "chain_id": 11155111,
+  "fetched_at": "2025-11-09T17:00:59.325055+00:00",
+  "eth_balance": 0.0,
+  "tokens": [],
+  "recent_transfers": [],
+  "staking_events_inferred": [],
+  "summary_for_claude": {
+    "holdings_text": "ETH: 0.000000",
+    "recent_activity_text": "No recent ERC-20 transfers in the lookback window.",
+    "questions_for_claude": [
+      "Explain the wallet holdings above in simple language.",
+      "Given the user\u2019s eETH/ETHFI balances and time in vaults, explain the trade-offs between holding, restaking, and unwinding positions.",
+      "Combine this wallet context with the model\u2019s ETH trend prediction to suggest whether the user should stake, restake, or de-risk."
+    ]
+  },
+  "config": {
+    "lookback_blocks": 20000,
+    "max_events": 200,
+    "vault_addresses": []
+  },
+  "errors": []
+}

@@ -10,7 +10,7 @@ export function HeroSection({
   effectiveBias,
 }: HeroSectionProps) {
   return (
-    <section className="hero-copy rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md lg:p-12">
+    <section className="hero-copy glow-border rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-md lg:p-12">
       <p className="mb-4 text-sm uppercase tracking-[0.4em] text-slate-300">
         Ethereum Alpha Console
       </p>
@@ -24,13 +24,6 @@ export function HeroSection({
             review how the model reconciles the two -- complete with live
             projections, tone analysis, and confidence bands.
           </p>
-        </div>
-        <div className="rounded-2xl border border-white/10 bg-black/30 px-6 py-5">
-          <p className="text-sm uppercase tracking-[0.3em] text-emerald-300">
-            Active window
-          </p>
-          <p className="text-2xl font-semibold">LSTM x FinBERT v0.3</p>
-          <p className="text-xs text-slate-300">Next refresh in 17 min</p>
         </div>
       </div>
     </section>

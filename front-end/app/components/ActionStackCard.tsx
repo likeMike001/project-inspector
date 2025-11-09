@@ -16,7 +16,10 @@ export function ActionStackCard({
   formatPercent,
 }: ActionStackCardProps) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+    <div
+      className="card-animate rounded-2xl border border-white/10 bg-black/30 p-4"
+      style={{ animationDelay: "0.05s" }}
+    >
       <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-slate-400">
         <span>Action stack</span>
         {lastRunAt && (

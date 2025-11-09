@@ -1,0 +1,30 @@
+{
+  "id": "eeth_liquidity_sample",
+  "title": "EtherFi eETH + Pendle LP sample",
+  "description": "Reference case pulled from Etherscan to help validate wallet_inspector against EtherFi staking flows.",
+  "etherscan_references": [
+    {
+      "label": "ether.fi ETH (eETH)",
+      "type": "token",
+      "address": "0x35fa164735182de50811e8e2e824cfb9b6118ac2",
+      "url": "https://etherscan.io/token/0x35fa164735182de50811e8e2e824cfb9b6118ac2",
+      "notes": "Liquid staking token issued by ether.fi"
+    },
+    {
+      "label": "Wrapped eETH (weETH)",
+      "type": "token",
+      "address": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+      "url": "https://etherscan.io/token/0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee",
+      "notes": "Wrapper used for Pendle and Karak LP positions"
+    },
+    {
+      "label": "eETH LP (27 JUN 2024)",
+      "type": "staking_contract",
+      "address": "0xa89a7420b19679b5a124cd1499787a6122e800d7",
+      "url": "https://etherscan.io/token/0xa89a7420b19679b5a124cd1499787a6122e800d7",
+      "notes": "Yearn vault representing Pendle eETH LP staking"
+    }
+  ],
+  "expected_behaviour": "Wallet inspector should highlight eETH/weETH balances and treat the Pendle LP exposure as a staking hint.",
+  "sample_prompt_suffix": "Call out these EtherFi + Pendle references when summarising wallets with similar flows."
+}

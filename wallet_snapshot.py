@@ -103,11 +103,17 @@ def _parse_tracked_tokens(raw: str) -> List[Dict[str, Any]]:
             address = checksum(parts[0])
         except Exception:
             continue
+        decimals_hint = None
+        if len(parts) > 2:
+            try:
+                decimals_hint = int(parts[2])
+            except ValueError:
+                decimals_hint = None
         tokens.append(
             {
                 "address": address,
                 "symbol_hint": parts[1] if len(parts) > 1 else None,
-                "decimals_hint": int(parts[2]) if len(parts) > 2 and parts[2].isdigit() else None,
+                "decimals_hint": decimals_hint,
             }
         )
     return tokens
@@ -139,6 +145,26 @@ def configure() -> Dict[str, Any]:
         "tracked_tokens": _parse_tracked_tokens(os.getenv("TRACKED_TOKEN_CONTRACTS", "")),
         "staking_contracts": _parse_address_list(os.getenv("STAKING_CONTRACTS", "")),
     }
+
+
+_SNAPSHOT_CONFIG: Dict[str, Any] | None = None
+_SNAPSHOT_WEB3: Optional[Web3] = None
+
+
+def _runtime() -> Tuple[Dict[str, Any], Web3]:
+    global _SNAPSHOT_CONFIG, _SNAPSHOT_WEB3
+    if _SNAPSHOT_CONFIG is None or _SNAPSHOT_WEB3 is None:
+        _SNAPSHOT_CONFIG = configure()
+        _SNAPSHOT_WEB3 = init_web3(_SNAPSHOT_CONFIG["rpc_url"])
+    return _SNAPSHOT_CONFIG, _SNAPSHOT_WEB3  # type: ignore[return-value]
+
+
+def _default_lookback() -> int:
+    return int(os.getenv("LOG_LOOKBACK_BLOCKS", "50000"))
+
+
+def _default_max_events() -> int:
+    return int(os.getenv("MAX_EVENTS", "200"))
 
 
 def init_web3(rpc_url: str) -> Web3:
@@ -234,6 +260,7 @@ def _etherscan_entry_to_event(entry: Dict[str, Any]) -> Optional[TransferEvent]:
 
 
 def human_value(raw: int, decimals: int) -> float:
+    decimals = int(decimals)
     scale = 10 ** decimals
     return float(raw) / scale if scale else float(raw)
 
@@ -244,6 +271,7 @@ def build_token_balances(
     transfers: Iterable[TransferEvent],
     *,
     extra_addresses: Optional[Iterable[str]] = None,
+    tracked_metadata: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> List[TokenBalance]:
     token_addresses = {t.token_address for t in transfers}
     if extra_addresses:
@@ -256,6 +284,17 @@ def build_token_balances(
         contract = w3.eth.contract(address=token_address, abi=ERC20_MIN_ABI)
         symbol = safe_call(contract.functions.symbol().call, default="UNKNOWN")
         decimals = safe_call(contract.functions.decimals().call, default=18)
+        meta = None
+        if tracked_metadata:
+            meta = tracked_metadata.get(token_address.lower())
+        if symbol in (None, "", "UNKNOWN") and meta and meta.get("symbol_hint"):
+            symbol = meta["symbol_hint"]
+        if decimals is None and meta and meta.get("decimals_hint") is not None:
+            decimals = meta["decimals_hint"]
+        elif isinstance(decimals, str) and decimals.isdigit():
+            decimals = int(decimals)
+        if decimals is None:
+            decimals = 18
         raw_balance = safe_call(lambda: contract.functions.balanceOf(checksummed_wallet).call(), default=0)
         balance = human_value(raw_balance, decimals)
         balances.append(
@@ -277,7 +316,12 @@ def safe_call(fn, default=None):
         return default
 
 
-def summarize(wallet: str, transfers: List[TransferEvent], eth_balance: float) -> Dict[str, Any]:
+def summarize(
+    wallet: str,
+    transfers: List[TransferEvent],
+    eth_balance: float,
+    holdings_text: str,
+) -> Dict[str, Any]:
     if transfers:
         latest = transfers[0]
         recent_activity = (
@@ -287,8 +331,6 @@ def summarize(wallet: str, transfers: List[TransferEvent], eth_balance: float) -
         )
     else:
         recent_activity = "No ERC-20 transfers found in the requested block window."
-
-    holdings_text = f"ETH: {eth_balance:.6f}"
 
     return {
         "wallet": wallet,
@@ -349,6 +391,35 @@ def summarize_staking_activity(
     return notes[:10]
 
 
+def format_holdings_text(eth_balance: float, token_balances: List[TokenBalance]) -> str:
+    top_tokens = sorted(
+        token_balances,
+        key=lambda tb: tb.balance,
+        reverse=True,
+    )
+    excerpts = [f"ETH: {eth_balance:.4f}"]
+    for token in top_tokens:
+        if token.balance <= 0:
+            continue
+        excerpts.append(f"{token.symbol or 'token'}: {token.balance:.4f}")
+        if len(excerpts) >= 5:
+            break
+    return ", ".join(excerpts)
+
+
+def format_tracked_token_text(tracked_tokens: List[Dict[str, Any]]) -> str:
+    if not tracked_tokens:
+        return ""
+    excerpts = []
+    for token in tracked_tokens:
+        symbol = token.get("symbol") or "token"
+        balance = token.get("balance")
+        if balance is None:
+            continue
+        excerpts.append(f"{symbol}: {balance:.4f}")
+    return ", ".join(excerpts)
+
+
 def compute_block_window(w3: Web3, lookback_blocks: int) -> Tuple[int, int]:
     end_block = w3.eth.block_number
     start_block = max(0, end_block - lookback_blocks)
@@ -383,13 +454,36 @@ def fetch_wallet_snapshot(
     transfers = transfers[:max_events]
 
     eth_balance = float(get_eth_balance(w3, wallet))
-    token_balances = build_token_balances(w3, wallet, transfers)
+    extra_addresses = [token["address"] for token in config["tracked_tokens"]]
+    tracked_meta = {token["address"].lower(): token for token in config["tracked_tokens"]}
+    token_balances = build_token_balances(
+        w3,
+        wallet,
+        transfers,
+        extra_addresses=extra_addresses,
+        tracked_metadata=tracked_meta,
+    )
 
-    summary = summarize(wallet, transfers, eth_balance)
+    holdings_text = format_holdings_text(eth_balance, token_balances)
+    summary = summarize(wallet, transfers, eth_balance, holdings_text)
+    tracked_token_summary = summarize_tracked_tokens(
+        token_balances, extra_addresses
+    )
+    staking_activity = summarize_staking_activity(
+        wallet,
+        transfers,
+        config["staking_contracts"],
+    )
+
+    tracked_token_text = format_tracked_token_text(tracked_token_summary)
+
     payload = {
         "summary": summary,
         "transfers": [asdict(t) for t in transfers],
         "token_balances": [asdict(tb) for tb in token_balances],
+        "tracked_tokens": tracked_token_summary,
+        "tracked_tokens_text": tracked_token_text,
+        "staking_activity": staking_activity,
         "metadata": {
             "lookback_blocks": lookback_blocks,
             "max_events": max_events,
@@ -398,6 +492,47 @@ def fetch_wallet_snapshot(
         },
     }
     return payload
+
+
+def snapshot_wallet(
+    wallet: str,
+    lookback_blocks: Optional[int] = None,
+    max_events: Optional[int] = None,
+) -> Dict[str, Any]:
+    if not Web3.is_address(wallet):
+        raise ValueError(f"{wallet} is not a valid Ethereum address")
+
+    config, w3 = _runtime()
+    lb = lookback_blocks if lookback_blocks is not None else _default_lookback()
+    me = max_events if max_events is not None else _default_max_events()
+
+    payload = fetch_wallet_snapshot(
+        w3,
+        wallet,
+        lookback_blocks=lb,
+        max_events=me,
+        config=config,
+    )
+    summary = payload["summary"]
+    wallet_addr = checksum(wallet)
+    response = {
+        "wallet": wallet_addr,
+        "fetched_at": summary["snapshot_at"],
+        "eth_balance": summary["eth_balance"],
+        "tokens": payload["token_balances"],
+        "staking_events_inferred": payload["staking_activity"],
+        "tracked_tokens": payload["tracked_tokens"],
+        "transfers": payload["transfers"],
+        "metadata": payload["metadata"],
+        "summary_for_claude": {
+            "holdings_text": summary["holdings_text"],
+            "recent_activity_text": summary["recent_activity_text"],
+            "tracked_token_highlights": payload["tracked_tokens"],
+            "tracked_token_text": payload["tracked_tokens_text"],
+        },
+        "errors": [],
+    }
+    return response
 
 
 def parse_args() -> argparse.Namespace:
@@ -430,15 +565,10 @@ def main() -> None:
     if not Web3.is_address(args.wallet):
         raise SystemExit(f"❌ {args.wallet} is not a valid Ethereum address")
 
-    config = configure()
-    w3 = init_web3(config["rpc_url"])
-
-    payload = fetch_wallet_snapshot(
-        w3,
+    payload = snapshot_wallet(
         args.wallet,
         lookback_blocks=args.lookback_blocks,
         max_events=args.max_events,
-        config=config,
     )
 
     json_payload = json.dumps(payload, indent=2)

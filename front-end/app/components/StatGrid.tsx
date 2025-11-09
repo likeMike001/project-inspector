@@ -18,7 +18,8 @@ export function StatGrid({ cards, onCardMount }: StatGridProps) {
         <div
           key={card.label}
           ref={(node) => onCardMount(idx, node)}
-          className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+          className="card-animate rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+          style={{ animationDelay: `${idx * 0.08}s` }}
         >
           <p className="text-sm uppercase tracking-[0.3em] text-slate-400">
             {card.label}

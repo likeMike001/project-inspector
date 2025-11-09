@@ -6,16 +6,19 @@
     "status": "ok",
     "size_bytes": 76648,
     "sha256": "7210b4bc9c7bd2b9512fe317e95c19cbfadf696101ff9e41a5eb75fca76464c2",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::etherfi_combined_labeled::2025-11-09T09:14:01.079404+00:00",
+      "proof_id": "eigen-sim::etherfi_combined_labeled::2025-11-09T17:55:48.846897+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "etherfi_combined_labeled"
+      "public_key": "16194949253901949599822917481250163756019299737249724225790367151394899737669",
+      "commitment": "21540171271789166849931598154384852178693300062064577130106700356105619928173",
+      "challenge": "17436732839229984140022817849090081548614448312338318840815594762776308176369",
+      "response": "14935073010098941513127236981069884627616295593649632706580463178450533041776"
     }
   },
   {
@@ -25,16 +28,19 @@
     "status": "ok",
     "size_bytes": 491455,
     "sha256": "38b06c092224669847df894adaaeef7e3e9dccc3f561a0f37e863c54df26605d",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::etherfi_combined_raw::2025-11-09T09:14:01.108589+00:00",
+      "proof_id": "eigen-sim::etherfi_combined_raw::2025-11-09T17:55:48.869317+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "etherfi_combined_raw"
+      "public_key": "9476397545675263915790517278006397845252318098381728246342215425621675206315",
+      "commitment": "19919348799878169215344126629966322742191052406373274479300314121577358156684",
+      "challenge": "13724482618576365947634109347067177712980000084643745273038584215206190611632",
+      "response": "15109214419083396161239364669303894536641777565257294504804089033224752135581"
     }
   },
   {
@@ -44,35 +50,41 @@
     "status": "ok",
     "size_bytes": 82428,
     "sha256": "54a9e493cbefbb5935a81a9f5e085abad40f4836b72f4b99f64c52f1482dbffd",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::final_with_sentiment::2025-11-09T09:14:01.110537+00:00",
+      "proof_id": "eigen-sim::final_with_sentiment::2025-11-09T17:55:48.873464+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "final_with_sentiment"
+      "public_key": "18222175357978690121142782740867124661966685757028575815392136724667857826608",
+      "commitment": "13599397238194692346309167964170068570602055512511686711607873093241999503593",
+      "challenge": "6164074885148978171135386848622999344408418817098974363034675585517538884744",
+      "response": "16416058321960045550277012234512688678365438502301178403831738919567733746818"
     }
   },
   {
-    "id": "synthetic_news",
-    "label": "Synthetic News Export",
+    "id": "news",
+    "label": "News Export",
     "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\data\\synthetic_news_string_20251109_060057.csv",
     "status": "missing",
     "size_bytes": null,
     "sha256": null,
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::synthetic_news::2025-11-09T09:14:01.110537+00:00",
+      "proof_id": "eigen-sim::news::2025-11-09T17:55:48.881568+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
-      "status": "pass",
-      "dataset": "synthetic_news"
+      "scheme": "schnorr-sha256",
+      "status": "missing",
+      "public_key": null,
+      "commitment": null,
+      "challenge": null,
+      "response": null
     }
   },
   {
@@ -82,16 +94,19 @@
     "status": "ok",
     "size_bytes": 256278,
     "sha256": "73acf2c32a47c50c412d4f27c24bfcaf15adb56ac5d83052a5666c8176efa5c6",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::eeth_apr::2025-11-09T09:14:01.134107+00:00",
+      "proof_id": "eigen-sim::eeth_apr::2025-11-09T17:55:48.886581+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "eeth_apr"
+      "public_key": "449144590646043393027917823850729496154151890725990867327218436468512130346",
+      "commitment": "18776369323692258064521828569657778276874702341323247682928347632198520887318",
+      "challenge": "7903173437975458414851152625041615807868418698987431876936386955297095753905",
+      "response": "14819952062162219322178493290413061537791981067689895390436153761036904943700"
     }
   },
   {
@@ -101,16 +116,19 @@
     "status": "ok",
     "size_bytes": 24600,
     "sha256": "fd9bcba806185143503da22270705fb642ec0a0ee69ac3207fe6113b7237bbc5",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::eeth_active_holders::2025-11-09T09:14:01.155478+00:00",
+      "proof_id": "eigen-sim::eeth_active_holders::2025-11-09T17:55:48.890615+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "eeth_active_holders"
+      "public_key": "6736034821916020694144099638011907955757784969053636385188649787204792411818",
+      "commitment": "12506475529709716532277054102841454805822447078073223059523668787250316273061",
+      "challenge": "6060642099609203218546989259686823193455512781479741747078111548788396580403",
+      "response": "12894275615535662372380100865846879085032107542843281918208361925699063864888"
     }
   },
   {
@@ -120,16 +138,19 @@
     "status": "ok",
     "size_bytes": 28774,
     "sha256": "28aae75185f337e833b0c1526acc45995927e149a516f1ecae03a12704a3e000",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::holder_retention::2025-11-09T09:14:01.175388+00:00",
+      "proof_id": "eigen-sim::holder_retention::2025-11-09T17:55:48.895214+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "holder_retention"
+      "public_key": "7722062956879676133890189503446260800591458316282635553309910999337129371482",
+      "commitment": "12193109355712408649497608170097738237026194239573345691900401041286415544622",
+      "challenge": "5774535570162706455860003600847480517967038621225675075324238192343241608717",
+      "response": "21848623333096567440977243318044448269655187463681535538625156974314676957560"
     }
   },
   {
@@ -139,16 +160,19 @@
     "status": "ok",
     "size_bytes": 33072,
     "sha256": "ee364cb0fc7d3644aaf464c82d83d1f0053b5d2866f54c6bca99e3257d7e7747",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::deposit_retention::2025-11-09T09:14:01.195923+00:00",
+      "proof_id": "eigen-sim::deposit_retention::2025-11-09T17:55:48.899146+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "deposit_retention"
+      "public_key": "3043889392585775143905173973873907825573213741877584993421624010840647716485",
+      "commitment": "15064107643362192428989090646629239953669426337153457118224150812068950234364",
+      "challenge": "17685741145726424839407610811571151596376470407634832574686249947178235097434",
+      "response": "18826591594098799596475221795086187724320479486859827588894540093828812047366"
     }
   },
   {
@@ -158,16 +182,19 @@
     "status": "ok",
     "size_bytes": 27073,
     "sha256": "91202410d2e4778bbcda30f051f2e5c89adbbfd9bb59846dfcd64466d1b05206",
-    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
+    "last_verified_at": "2025-11-09T17:55:48.817194+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::vault_deposit_retention::2025-11-09T09:14:01.216962+00:00",
+      "proof_id": "eigen-sim::vault_deposit_retention::2025-11-09T17:55:48.905219+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
-      "scheme": "zkp-demo",
+      "scheme": "schnorr-sha256",
       "status": "pass",
-      "dataset": "vault_deposit_retention"
+      "public_key": "5603614623628055514892813123076950373437536748756473278230600510506178062461",
+      "commitment": "21343533797343919162282652502404723432202795105144129928807896055973157455374",
+      "challenge": "14133042140408882436090176127667229858702319899784077907568601047402049313076",
+      "response": "14259263168615065409762586950458863244196692633203659353676823152602066451952"
     }
   }
 ]

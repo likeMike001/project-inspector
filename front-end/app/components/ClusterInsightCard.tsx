@@ -14,7 +14,10 @@ export function ClusterInsightCard({
   formatMetricValue,
 }: ClusterInsightCardProps) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+    <div
+      className="card-animate rounded-2xl border border-white/10 bg-black/30 p-4"
+      style={{ animationDelay: "0.08s" }}
+    >
       <p className="text-xs uppercase tracking-[0.4em] text-slate-400">
         Cluster regime
       </p>

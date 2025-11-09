@@ -29,7 +29,7 @@ export function SentimentChart({
   return (
     <div
       ref={refCallback}
-      className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
+      className="panel-animate glow-border rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur"
     >
       <div className="flex items-center justify-between">
         <div>
@@ -75,7 +75,10 @@ export function SentimentChart({
           <div className="h-full animate-pulse rounded-2xl bg-slate-800/50" />
         )}
       </div>
-      <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-slate-300">
+      <div
+        className="card-animate mt-4 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-slate-300"
+        style={{ animationDelay: "0.1s" }}
+      >
         <p>
           Neutral cluster is shrinking as wallet narratives skew bullish. Expect
           sentiment weight to stay elevated unless regulatory risk resurfaces.
