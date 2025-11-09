@@ -24,7 +24,7 @@ from __future__ import annotations
 
 import json
 import pickle
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Tuple
 
@@ -431,10 +431,12 @@ class StakingSignalTrainer:
         model.fit(X_train, y_train)
         metrics = self._evaluate(model, X_test, y_test)
 
+        focus_snapshot = asdict(focus)
         artifact = {
             "model_type": model_type,
             "model": model,
             "focus": focus,
+            "focus_snapshot": focus_snapshot,
             "feature_names": list(features.columns),
             "imputer": self.numeric_imputer,
             "label_classes": self.label_encoder.classes_.tolist(),
@@ -468,10 +470,13 @@ class StakingSignalTrainer:
         Persist a trained model artifact (model, imputer, label classes, focus).
         """
         artifact = self._ensure_model_ready(model_type)
+        focus_data = artifact.get("focus_snapshot")
+        if focus_data is None and isinstance(artifact.get("focus"), FocusConfig):
+            focus_data = asdict(artifact["focus"])
         bundle = {
             "model_type": model_type,
             "model": artifact["model"],
-            "focus": artifact["focus"],
+            "focus": focus_data,
             "feature_names": artifact["feature_names"],
             "numeric_imputer": artifact["imputer"],
             "label_classes": artifact["label_classes"],

@@ -2,12 +2,27 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-### Trust API configuration
+### API configuration
 
 Set the verification service URL (FastAPI from `trust_layer`) before running the dev server:
 
 ```bash
 export NEXT_PUBLIC_TRUST_API_URL="http://localhost:8000"
+```
+
+Point the UI at the model signal service (FastAPI/Flask that loads the `.pkl`
+artifacts for RandomForest + clustering):
+
+```bash
+export NEXT_PUBLIC_MODEL_API_URL="http://localhost:8001"
+```
+
+For proof-of-concept demos where the backend may not be available, you can pin
+the slider and render canned recommendations:
+
+```bash
+export NEXT_PUBLIC_DEMO_SIGNALS=true
+export NEXT_PUBLIC_DEMO_WEIGHT=65   # optional override
 ```
 
 First, run the development server:

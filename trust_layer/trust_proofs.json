@@ -2,14 +2,14 @@
   {
     "id": "etherfi_combined_labeled",
     "label": "EtherFi Combined Labeled Dataset",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/etherfi_combined_labeled.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\etherfi_combined_labeled.csv",
     "status": "ok",
-    "size_bytes": 76547,
-    "sha256": "d832cc113bc86c33ff5e2ab2c4c1339551bd34205bf61c2b62a5741e1bcbd9bc",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 76648,
+    "sha256": "7210b4bc9c7bd2b9512fe317e95c19cbfadf696101ff9e41a5eb75fca76464c2",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::etherfi_combined_labeled::2025-11-09T07:35:42.096897+00:00",
+      "proof_id": "eigen-sim::etherfi_combined_labeled::2025-11-09T09:14:01.079404+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -21,14 +21,14 @@
   {
     "id": "etherfi_combined_raw",
     "label": "EtherFi Combined (Raw)",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/etherfi_combined.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\etherfi_combined.csv",
     "status": "ok",
-    "size_bytes": 490776,
-    "sha256": "10f94eb53a76829849da7b03b325ca51796e75ef0331b203720912710f40c0ca",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 491455,
+    "sha256": "38b06c092224669847df894adaaeef7e3e9dccc3f561a0f37e863c54df26605d",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::etherfi_combined_raw::2025-11-09T07:35:42.097416+00:00",
+      "proof_id": "eigen-sim::etherfi_combined_raw::2025-11-09T09:14:01.108589+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -40,14 +40,14 @@
   {
     "id": "final_with_sentiment",
     "label": "Final Dataset with Sentiment",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/data/final_with_sentiment.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\data\\final_with_sentiment.csv",
     "status": "ok",
-    "size_bytes": 76898,
-    "sha256": "14bbbc75ec2dd349c85b17eafba1ea16134d1d982985dd902fe5395c5ed310b7",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 82428,
+    "sha256": "54a9e493cbefbb5935a81a9f5e085abad40f4836b72f4b99f64c52f1482dbffd",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::final_with_sentiment::2025-11-09T07:35:42.097792+00:00",
+      "proof_id": "eigen-sim::final_with_sentiment::2025-11-09T09:14:01.110537+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -59,14 +59,14 @@
   {
     "id": "synthetic_news",
     "label": "Synthetic News Export",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/data/synthetic_news_string_20251109_060057.csv",
-    "status": "ok",
-    "size_bytes": 3809,
-    "sha256": "4abbd916825d3d43603e8f6b23e95a68aefcebd189e9b3642b5dc8652eb9f708",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\data\\synthetic_news_string_20251109_060057.csv",
+    "status": "missing",
+    "size_bytes": null,
+    "sha256": null,
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::synthetic_news::2025-11-09T07:35:42.097935+00:00",
+      "proof_id": "eigen-sim::synthetic_news::2025-11-09T09:14:01.110537+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -78,14 +78,14 @@
   {
     "id": "eeth_apr",
     "label": "eETH APR Snapshot",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/datasets/eETH_APR.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\datasets\\eETH_APR.csv",
     "status": "ok",
-    "size_bytes": 255599,
-    "sha256": "d5f14b376cf26f60df2a7e09ab8cf1498a55237fcf9013abddabb2a53ba2d206",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 256278,
+    "sha256": "73acf2c32a47c50c412d4f27c24bfcaf15adb56ac5d83052a5666c8176efa5c6",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::eeth_apr::2025-11-09T07:35:42.098322+00:00",
+      "proof_id": "eigen-sim::eeth_apr::2025-11-09T09:14:01.134107+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -97,14 +97,14 @@
   {
     "id": "eeth_active_holders",
     "label": "eETH Active Holder Snapshot",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/datasets/eETH_Active_Holder.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\datasets\\eETH_Active_Holder.csv",
     "status": "ok",
-    "size_bytes": 24398,
-    "sha256": "42cac82e35aa20af99811748b60544f8017cd75a11f8143447ecb05056c868db",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 24600,
+    "sha256": "fd9bcba806185143503da22270705fb642ec0a0ee69ac3207fe6113b7237bbc5",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::eeth_active_holders::2025-11-09T07:35:42.098581+00:00",
+      "proof_id": "eigen-sim::eeth_active_holders::2025-11-09T09:14:01.155478+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -116,14 +116,14 @@
   {
     "id": "holder_retention",
     "label": "EtherFi Holder Retention",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/datasets/etherFI_Holder_retention.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\datasets\\etherFI_Holder_retention.csv",
     "status": "ok",
-    "size_bytes": 28673,
-    "sha256": "8965ab46da6863a4a87de56e89c0411d7e36beab9171b525259f25c72a47a0a1",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 28774,
+    "sha256": "28aae75185f337e833b0c1526acc45995927e149a516f1ecae03a12704a3e000",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::holder_retention::2025-11-09T07:35:42.098768+00:00",
+      "proof_id": "eigen-sim::holder_retention::2025-11-09T09:14:01.175388+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -135,14 +135,14 @@
   {
     "id": "deposit_retention",
     "label": "EtherFi Deposit Retention",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/datasets/etherFI_deposit_Retention.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\datasets\\etherFI_deposit_Retention.csv",
     "status": "ok",
-    "size_bytes": 32970,
-    "sha256": "3a55a48389c067d1a6dae7581e492d829bdee19b93b6453dd5612e0b1636558d",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 33072,
+    "sha256": "ee364cb0fc7d3644aaf464c82d83d1f0053b5d2866f54c6bca99e3257d7e7747",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::deposit_retention::2025-11-09T07:35:42.098954+00:00",
+      "proof_id": "eigen-sim::deposit_retention::2025-11-09T09:14:01.195923+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {
@@ -154,14 +154,14 @@
   {
     "id": "vault_deposit_retention",
     "label": "EtherFi Liquid Vault Deposit Retention",
-    "path": "/Users/vishnudevireddy/Desktop/no/asuhackathon/project-one/datasets/etherFI_Liquid_Valut_Deposit_retention.csv",
+    "path": "C:\\Users\\Rudre\\Downloads\\Claude-Hack\\project-one\\datasets\\etherFI_Liquid_Valut_Deposit_retention.csv",
     "status": "ok",
-    "size_bytes": 26988,
-    "sha256": "ab2c00401dd0cb41e91537038f7743f175821ea8b9bb87826ba263f3826ff927",
-    "last_verified_at": "2025-11-09T07:35:42.096495+00:00",
+    "size_bytes": 27073,
+    "sha256": "91202410d2e4778bbcda30f051f2e5c89adbbfd9bb59846dfcd64466d1b05206",
+    "last_verified_at": "2025-11-09T09:14:01.035971+00:00",
     "eigenlayer_attestation": {
       "simulated": true,
-      "proof_id": "eigen-sim::vault_deposit_retention::2025-11-09T07:35:42.099136+00:00",
+      "proof_id": "eigen-sim::vault_deposit_retention::2025-11-09T09:14:01.216962+00:00",
       "confidence": 0.9
     },
     "zkp_simulation": {

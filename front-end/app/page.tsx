@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { gsap } from "gsap";
 import {
   Bar,
@@ -15,6 +15,20 @@ import {
 } from "recharts";
 
 type FocusMode = "price" | "sentiment";
+
+type Recommendation = {
+  action: string;
+  probability: number;
+  rationale?: string;
+};
+
+type ClusterInsight = {
+  id: number;
+  label?: string;
+  description?: string;
+  drivers?: string[];
+  metrics?: Record<string, number>;
+};
 
 type TrustDataset = {
   id: string;
@@ -35,6 +49,45 @@ type TrustDataset = {
 
 const TRUST_API_URL =
   process.env.NEXT_PUBLIC_TRUST_API_URL ?? "http://localhost:8000";
+const MODEL_API_URL =
+  process.env.NEXT_PUBLIC_MODEL_API_URL ?? "http://localhost:8001";
+const USE_DEMO_SIGNALS =
+  (process.env.NEXT_PUBLIC_DEMO_SIGNALS ?? "false").toLowerCase() === "true";
+const DEMO_WEIGHT = Number(process.env.NEXT_PUBLIC_DEMO_WEIGHT ?? 65);
+const snapWeight = (value: number) => (value < 50 ? 50 : 60);
+const formatMetricValue = (value: number | null | undefined) => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return "—";
+  }
+  if (Math.abs(value) >= 1) {
+    return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+  }
+  return value.toFixed(4);
+};
+
+const DEMO_RECOMMENDATIONS: Recommendation[] = [
+  { action: "restake", probability: 0.58, rationale: "Price-weighted snapshot favours compounding rewards." },
+  { action: "stake", probability: 0.29, rationale: "Neutral stance keeps capital deployed in baseline pools." },
+  { action: "liquid_stake", probability: 0.13, rationale: "Liquidity optionality remains a secondary hedge." },
+];
+
+const DEMO_CLUSTER: ClusterInsight = {
+  id: 0,
+  label: "Restake skew",
+  description: "APR momentum trending higher alongside elevated withdrawer counts.",
+  drivers: [
+    "Daily APR sits near local highs with positive netflows.",
+    "Depositors outpace withdrawers after semantic boost.",
+  ],
+  metrics: {
+    daily_apr: 0.0259,
+    withdraw: -3200,
+    deposit: 12500,
+    daily_netflow: 9300,
+    withdrawers: 58,
+    depositors: 72,
+  },
+};
 
 const mockPriceSeries = [
   { label: "Now", spot: 3540, projection: 3540 },
@@ -51,25 +104,51 @@ const mockSentiment = [
   { label: "Negative", value: 15 },
 ];
 
-const insightBullets = [
-  "LLM tone is trending optimistic as macro liquidity stabilizes.",
-  "Price model spots a 5.6% upside with tight volatility bands.",
-  "Neutral news weight is rising; keep an eye on regulatory chatter.",
-];
+const DEFAULT_NARRATIVE =
+  "Models are syncing signals—adjust the slider to see how focus shifts recommendations.";
+const DEMO_NARRATIVE =
+  "Claude notes a restake tilt with liquidity hedges kept light; watch deposits outpacing withdrawals.";
 
 export default function Home() {
   const [focus, setFocus] = useState<FocusMode>("price");
-  const [weight, setWeight] = useState(65); // 0 sentiment bias — 100 price bias
+  const [weight, setWeight] = useState(DEMO_WEIGHT); // 0 sentiment bias — 100 price bias
+  const [effectiveBias, setEffectiveBias] = useState(snapWeight(DEMO_WEIGHT));
   const [wallet, setWallet] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [trustDatasets, setTrustDatasets] = useState<TrustDataset[]>([]);
   const [trustStatus, setTrustStatus] =
     useState<"idle" | "loading" | "error">("idle");
+  const [recStatus, setRecStatus] =
+    useState<"idle" | "loading" | "error">("idle");
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [clusterInsight, setClusterInsight] = useState<ClusterInsight | null>(
+    null,
+  );
+  const [modelMessage, setModelMessage] = useState<string | null>(null);
+  const [lastRunAt, setLastRunAt] = useState<string | null>(null);
+  const [narrativeCopy, setNarrativeCopy] = useState<string>(DEFAULT_NARRATIVE);
 
   const heroRef = useRef<HTMLDivElement | null>(null);
   const highlightRef = useRef<HTMLSpanElement | null>(null);
   const cardRefs = useRef<HTMLDivElement[]>([]);
   const chartRefs = useRef<HTMLDivElement[]>([]);
+  const inferenceController = useRef<AbortController | null>(null);
+  const walletRef = useRef(wallet);
+  const weightRef = useRef(effectiveBias);
+
+  useEffect(() => {
+    walletRef.current = wallet;
+  }, [wallet]);
+
+  useEffect(() => {
+    weightRef.current = effectiveBias;
+  }, [effectiveBias]);
+
+  useEffect(() => {
+    return () => {
+      inferenceController.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setHydrated(true));
@@ -163,6 +242,99 @@ export default function Home() {
     focus === "price"
       ? "ML is prioritizing on-chain microstructure and order flow."
       : "LLM-derived tone will steer allocations for the next window.";
+  const formatPercent = (value: number | null | undefined) => {
+    if (typeof value !== "number" || Number.isNaN(value)) {
+      return "—";
+    }
+    return `${(value * 100).toFixed(1)}%`;
+  };
+
+  const runInference = useCallback(
+    async ({
+      trigger = "manual",
+      bias,
+      includeWallet = false,
+    }: {
+      trigger?: "auto" | "manual";
+      bias?: number;
+      includeWallet?: boolean;
+    } = {}) => {
+      const effectiveBias =
+        typeof bias === "number" ? bias : weightRef.current ?? weight;
+      const priceWeight = Math.min(Math.max(effectiveBias / 100, 0), 1);
+      const sentimentWeight = 1 - priceWeight;
+      const payload = {
+        price_weight: priceWeight,
+        sentiment_weight: sentimentWeight,
+        wallet:
+          includeWallet && walletRef.current.trim().length > 0
+            ? walletRef.current.trim()
+            : null,
+      };
+
+      if (USE_DEMO_SIGNALS) {
+        setRecommendations(DEMO_RECOMMENDATIONS);
+        setClusterInsight(DEMO_CLUSTER);
+        setModelMessage("Demo snapshot loaded locally.");
+        setLastRunAt(new Date().toISOString());
+         setNarrativeCopy(DEMO_NARRATIVE);
+        setRecStatus("idle");
+        return;
+      }
+
+      inferenceController.current?.abort();
+      const controller = new AbortController();
+      inferenceController.current = controller;
+
+      try {
+        setRecStatus("loading");
+        setModelMessage(
+          trigger === "auto"
+            ? "Updating signals to reflect the slider."
+            : "Fetching the freshest signal mix.",
+        );
+        const response = await fetch(`${MODEL_API_URL}/signals`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error(`Model API error: ${response.status}`);
+        }
+        const body = await response.json();
+        if (controller.signal.aborted) return;
+        setRecommendations(body.recommendations ?? []);
+        setClusterInsight(body.cluster ?? null);
+        setModelMessage(body.message ?? null);
+        setLastRunAt(body.generated_at ?? new Date().toISOString());
+        setNarrativeCopy(body.narrative ?? DEFAULT_NARRATIVE);
+        setRecStatus("idle");
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        console.error("Failed to fetch model signal", error);
+        setRecStatus("error");
+        setRecommendations(DEMO_RECOMMENDATIONS);
+        setClusterInsight(DEMO_CLUSTER);
+        setModelMessage(
+          "Falling back to demo snapshot while the model API is unreachable.",
+        );
+        setLastRunAt(new Date().toISOString());
+        setNarrativeCopy(DEFAULT_NARRATIVE);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const debounce = setTimeout(() => {
+      runInference({
+        trigger: USE_DEMO_SIGNALS ? "manual" : "auto",
+        bias: effectiveBias,
+      });
+    }, USE_DEMO_SIGNALS ? 0 : 600);
+    return () => clearTimeout(debounce);
+  }, [effectiveBias, runInference]);
 
   const statCards = [
     {
@@ -212,6 +384,16 @@ export default function Home() {
               <p className="text-2xl font-semibold">LSTM x FinBERT v0.3</p>
               <p className="text-xs text-slate-300">Next refresh in 17 min</p>
             </div>
+            {/* <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+              <p className="text-xs uppercase tracking-[0.4em] text-slate-400">
+                Claude insight
+              </p>
+              <p className="mt-3 text-base text-slate-100">{narrativeCopy}</p>
+              <p className="mt-4 text-xs text-slate-400">
+                Slider bias locked at {effectiveBias}% price ·{" "}
+                {100 - effectiveBias}% sentiment.
+              </p>
+            </div> */}
           </div>
         </section>
 
@@ -252,7 +434,13 @@ export default function Home() {
                   onChange={(e) => {
                     const next = Number(e.target.value);
                     setWeight(next);
-                    setFocus(next >= 50 ? "price" : "sentiment");
+                    const snapped = snapWeight(next);
+                    setFocus(snapped >= 50 ? "price" : "sentiment");
+                    setEffectiveBias(snapped);
+                    console.log("Preference updated", {
+                      sliderValue: next,
+                      appliedPriceWeight: snapped / 100,
+                    });
                   }}
                   className="h-1 w-full appearance-none rounded-full bg-slate-700 accent-emerald-400"
                 />
@@ -268,29 +456,161 @@ export default function Home() {
                   onChange={(e) => setWallet(e.target.value)}
                   placeholder="0x… (coming soon to modeling layer)"
                   className="flex-1 rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none transition focus:border-emerald-400/70"
+                  disabled={USE_DEMO_SIGNALS}
                 />
-                <button className="rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-6 py-3 text-sm font-semibold text-slate-900 shadow-2xl shadow-emerald-500/30">
-                  Queue signal
+                <button
+                  onClick={() =>
+                    runInference({ trigger: "manual", includeWallet: true })
+                  }
+                  disabled={recStatus === "loading" || USE_DEMO_SIGNALS}
+                  className={`rounded-xl px-6 py-3 text-sm font-semibold shadow-2xl shadow-emerald-500/30 transition ${
+                    recStatus === "loading"
+                      ? "cursor-not-allowed bg-slate-600 text-slate-300"
+                      : "bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-900"
+                  }`}
+                >
+                  {recStatus === "loading" ? "Updating…" : "Run signal"}
                 </button>
               </div>
               <p className="mt-2 text-xs text-slate-400">
-                We’ll incorporate per-wallet flows once the feature store is
-                wired to on-chain traces.
+                Wallet routing remains optional; we’ll pass it to the modeling
+                layer when available.
               </p>
+              {modelMessage && (
+                <p className="mt-3 text-xs text-slate-400">
+                  {recStatus === "error" ? "⚠️ " : "ℹ️ "}
+                  {modelMessage}
+                </p>
+              )}
+            </div>
+            <div className="mt-6 grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-slate-400">
+                  <span>Action stack</span>
+                  {lastRunAt && (
+                    <span className="text-[10px] normal-case text-slate-500">
+                      {new Date(lastRunAt).toLocaleTimeString()}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-3 space-y-3">
+                  {recStatus === "loading" && (
+                    <div className="space-y-2">
+                      {[0, 1, 2].map((idx) => (
+                        <div
+                          key={idx}
+                          className="h-10 animate-pulse rounded-xl bg-slate-800/40"
+                        />
+                      ))}
+                    </div>
+                  )}
+                  {recStatus !== "loading" && recommendations.length === 0 && (
+                    <p className="text-sm text-slate-400">
+                      No actions yet—adjust the slider or run the signal to see
+                      recommendations.
+                    </p>
+                  )}
+                  {recStatus !== "loading" &&
+                    recommendations.map((rec, index) => (
+                      <div
+                        key={rec.action}
+                        className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3"
+                      >
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.5em] text-slate-500">
+                            {index + 1 < 10 ? `0${index + 1}` : index + 1}
+                          </p>
+                          <p className="text-lg font-semibold text-white">
+                            {rec.action}
+                          </p>
+                          {rec.rationale && (
+                            <p className="text-xs text-slate-400">
+                              {rec.rationale}
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-base font-semibold text-emerald-300">
+                          {formatPercent(rec.probability)}
+                        </span>
+                      </div>
+                    ))}
+                  {recStatus === "error" && (
+                    <p className="text-sm text-rose-300">
+                      Unable to refresh recommendations. Check the model API.
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                <p className="text-xs uppercase tracking-[0.4em] text-slate-400">
+                  Cluster regime
+                </p>
+                {clusterInsight ? (
+                  <div className="mt-3 space-y-3">
+                    <div>
+                      <p className="text-2xl font-semibold text-white">
+                        Cluster {clusterInsight.id}
+                      </p>
+                      <p className="text-sm text-slate-300">
+                        {clusterInsight.label ?? "Unlabeled regime"}
+                      </p>
+                    </div>
+                    {clusterInsight.description && (
+                      <p className="text-sm text-slate-300">
+                        {clusterInsight.description}
+                      </p>
+                    )}
+                    {clusterInsight.drivers && clusterInsight.drivers.length > 0 && (
+                      <ul className="space-y-2 text-sm text-slate-300">
+                        {clusterInsight.drivers.map((driver) => (
+                          <li
+                            key={driver}
+                            className="flex items-start gap-2 text-xs text-slate-400"
+                          >
+                            <span className="mt-1 h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                            {driver}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {clusterInsight.metrics && (
+                      <div className="grid grid-cols-2 gap-3 text-xs text-slate-300">
+                        {Object.entries(clusterInsight.metrics)
+                          .slice(0, 4)
+                          .map(([key, value]) => (
+                            <div
+                              key={key}
+                              className="rounded-xl border border-white/10 bg-slate-900/40 p-3"
+                              >
+                                <p className="uppercase tracking-[0.3em] text-slate-500">
+                                  {key.replace(/_/g, " ")}
+                                </p>
+                                <p className="text-base font-semibold text-white">
+                                  {formatMetricValue(value)}
+                                </p>
+                              </div>
+                            ))}
+                      </div>
+                    )}
+                  </div>
+                ) : recStatus === "loading" ? (
+                  <div className="mt-4 h-32 animate-pulse rounded-2xl bg-slate-800/50" />
+                ) : (
+                  <p className="mt-3 text-sm text-slate-400">
+                    Adjust the slider or run the signal to classify the current
+                    regime.
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           <div className="rounded-3xl border border-white/10 bg-gradient-to-b from-black/60 to-slate-900/40 p-6">
             <h3 className="text-sm uppercase tracking-[0.4em] text-slate-400">
               Live takeaways
             </h3>
-            <ul className="mt-4 space-y-4 text-sm text-slate-200">
-              {insightBullets.map((line) => (
-                <li key={line} className="flex gap-3">
-                  <span className="mt-1 h-2 w-2 rounded-full bg-emerald-400" />
-                  <p>{line}</p>
-                </li>
-              ))}
-            </ul>
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-slate-200">
+              <p>{narrativeCopy}</p>
+            </div>
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/30 p-5 text-sm text-slate-300">
               <p className="text-xs uppercase tracking-[0.4em] text-emerald-300">
                 Model status
