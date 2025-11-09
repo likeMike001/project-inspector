@@ -315,7 +315,7 @@ def _initialise_runtimes() -> None:
     global rf_runtime, cluster_runtime, anthropic_client
     rf_runtime = RandomForestRuntime()
     cluster_runtime = ClusterRuntime()
-    api_key ="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"
+    api_key = os.getenv("CLAUDE_API_KEY")
     if api_key and Anthropic is not None:
         anthropic_client = Anthropic(api_key=api_key)
         print("[claude] Anthropic client initialized for narratives.")
