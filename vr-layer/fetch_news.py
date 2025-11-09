@@ -1,15 +1,23 @@
-from gnews import GNews
-
-google_news = GNews(language='en', country='US', period='7d', max_results=10)
-results = google_news.get_news('Ethereum')
+# fetch_news.py
+from news_extractor import generate_synthetic_news
 
 
-for news in results:
-    print(f"Title: {news['title']}")
-    print(f"Description: {news['description']}")
-    print(f"URL: {news['url']}")
-    print(f"Published At: {news['published date']}")
-    # print(f"Content: {news['content']}")
-    print("-" * 80)
-    
-    
+def main():
+    topic = "Ethereum"
+    num_articles = 10
+
+    articles = generate_synthetic_news(topic, num_articles)
+
+    for article in articles:
+        print(f"ID:           {article['id']}")
+        print(f"Topic:        {article['topic']}")
+        print(f"Headline:     {article['headline']}")
+        print(f"Source:       {article['source']}")
+        print(f"Published At: {article['published_at']}")
+        print("Body (first 300 chars):")
+        print(article['body'][:300])
+        print("-" * 80)
+
+
+if __name__ == "__main__":
+    main()
